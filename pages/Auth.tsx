@@ -5,6 +5,7 @@ import { auth, db } from '../services/firebase';
 import { useNavigate, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { BackgroundPaths } from '../components/landing/FloatingPaths';
+import Logo from '../components/Logo';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -429,9 +430,9 @@ const AuthPage: React.FC = () => {
 
                 <img
                   ref={logoRef}
-                  src="/logo.png"
+                  src="/logo-white.png"
                   alt="InterviewXpert Logo"
-                  className="w-16 h-16 rounded-xl mb-6 shadow-xl shadow-yellow-500/10 opacity-0 invert hue-rotate-180"
+                  className="w-16 h-16 rounded-xl mb-6 shadow-xl shadow-yellow-500/10 opacity-0"
                 />
 
                 <h3

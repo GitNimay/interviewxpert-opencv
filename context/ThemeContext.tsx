@@ -40,6 +40,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
         root.classList.remove('dark');
       }
+
+      // Update favicon to match theme
+      if (typeof (window as any).updateFavicon === 'function') {
+        (window as any).updateFavicon();
+      }
     };
 
     applyTheme();

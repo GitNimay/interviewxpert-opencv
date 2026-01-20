@@ -1,92 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InterviewXpert - AI Interview Platform</title>
-    <meta name="description" content="InterviewXpert is an AI-powered platform designed to help you master your interview skills with real-time feedback and practice scenarios." />
-    <link rel="icon" type="image/png" href="/logo.png">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                DEFAULT: '#007bff',
-                dark: '#0056b3',
-                light: '#e7f2ff'
-              },
-              secondary: '#6c757d',
-              success: '#28a745',
-              danger: '#dc3545',
-              warning: '#ffc107',
-              info: '#17a2b8',
-              purple: '#6f42c1',
-              teal: '#20c997',
-              dark: '#343a40',
-              light: '#f8f9fa'
-            },
-            fontFamily: {
-              sans: ['Poppins', 'sans-serif'],
-            },
-            animation: {
-              blob: "blob 7s infinite",
-              marquee: "marquee var(--duration) linear infinite",
-              "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
-            },
-            keyframes: {
-              blob: {
-                "0%": { transform: "translate(0px, 0px) scale(1)" },
-                "33%": { transform: "translate(30px, -50px) scale(1.1)" },
-                "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
-                "100%": { transform: "translate(0px, 0px) scale(1)" },
-              },
-              marquee: {
-                from: { transform: "translateX(0)" },
-                to: { transform: "translateX(calc(-100% - var(--gap)))" },
-              },
-              "marquee-vertical": {
-                from: { transform: "translateY(0)" },
-                to: { transform: "translateY(calc(-100% - var(--gap)))" },
-              },
-            },
-            zIndex: {
-              'navbar': '40',
-              'overlay': '50',
-              'modal': '110',
-            },
-          }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InterviewXpert - AI Interview Platform</title>
+  <meta name="description"
+    content="InterviewXpert is an AI-powered platform designed to help you master your interview skills with real-time feedback and practice scenarios." />
+  <link id="favicon" rel="icon" type="image/png" href="/logo-black.png">
+  <!-- Dynamic favicon based on theme -->
+  <script>
+    (function () {
+      function updateFavicon() {
+        var favicon = document.getElementById('favicon');
+        if (favicon) {
+          var isDark = localStorage.theme === 'dark' ||
+            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          favicon.href = isDark ? '/logo-white.png' : '/logo-black.png';
         }
       }
-    </script>
-    <script>
-      // Immediately apply dark mode if preference exists to prevent FOUC (Flash of Unstyled Content)
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
+      // Update on load
+      updateFavicon();
+      // Update when localStorage changes
+      window.addEventListener('storage', updateFavicon);
+      // Update when system preference changes
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
+      // Expose function for theme toggle to call
+      window.updateFavicon = updateFavicon;
+    })();
+  </script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#007bff',
+              dark: '#0056b3',
+              light: '#e7f2ff'
+            },
+            secondary: '#6c757d',
+            success: '#28a745',
+            danger: '#dc3545',
+            warning: '#ffc107',
+            info: '#17a2b8',
+            purple: '#6f42c1',
+            teal: '#20c997',
+            dark: '#343a40',
+            light: '#f8f9fa'
+          },
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          },
+          animation: {
+            blob: "blob 7s infinite",
+            marquee: "marquee var(--duration) linear infinite",
+            "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+          },
+          keyframes: {
+            blob: {
+              "0%": { transform: "translate(0px, 0px) scale(1)" },
+              "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+              "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+              "100%": { transform: "translate(0px, 0px) scale(1)" },
+            },
+            marquee: {
+              from: { transform: "translateX(0)" },
+              to: { transform: "translateX(calc(-100% - var(--gap)))" },
+            },
+            "marquee-vertical": {
+              from: { transform: "translateY(0)" },
+              to: { transform: "translateY(calc(-100% - var(--gap)))" },
+            },
+          },
+          zIndex: {
+            'navbar': '40',
+            'overlay': '50',
+            'modal': '110',
+          },
+        }
       }
-    </script>
-    <style>
-      .dark body {
-        background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 50%, #020617 100%);
-        background-attachment: fixed;
-      }
-    </style>
+    }
+  </script>
+  <script>
+    // Immediately apply dark mode if preference exists to prevent FOUC (Flash of Unstyled Content)
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  </script>
+  <style>
+    .dark body {
+      background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 50%, #020617 100%);
+      background-attachment: fixed;
+    }
+  </style>
 </head>
-  <body class="bg-gray-50 dark:bg-[#020617] text-gray-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
-    <div id="root"></div>
-    <div id="portal-root"></div>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+<body
+  class="bg-gray-50 dark:bg-[#020617] text-gray-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+  <div id="root"></div>
+  <div id="portal-root"></div>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

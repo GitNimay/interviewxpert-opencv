@@ -7,6 +7,7 @@ import { auth } from '../services/firebase';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { Sun, Moon, Menu, X, Monitor } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
+import Logo from './Logo';
 
 
 
@@ -50,14 +51,11 @@ const LayoutContent: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <div className="flex justify-between h-16 items-center">
 
             {/* Logo Area */}
-            <div className="flex-shrink-0 flex items-center gap-3">
-              <Link to="/" className="flex items-center gap-2 group">
+            <div className="flex-shrink-0 flex items-center">
+              <Link to="/" className="flex items-center group">
                 <div className="w-10 h-10 flex items-center justify-center transition-all duration-300">
-                  <img src="/gold_logo.png" alt="Logo" className="w-10 h-10 object-contain dark:invert" />
+                  <Logo className="w-10 h-10" />
                 </div>
-                <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white block group-hover:text-primary transition-colors">
-                  Interview<span className="text-orange-500 font-light">Xpert</span>
-                </span>
               </Link>
             </div>
 
@@ -237,7 +235,7 @@ const LayoutContent: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
-                <img src="/gold_logo.png" alt="Logo" className="w-6 h-6 object-contain dark:invert" />
+                <Logo className="w-6 h-6" />
                 <span className="text-sm font-semibold text-gray-900 dark:text-white tracking-tight">InterviewXpert</span>
               </div>
 

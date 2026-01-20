@@ -9,6 +9,7 @@ import { GShapeAnimation } from '../components/AdminAnimations';
 import { Users, FileText, DollarSign, UserPlus, Briefcase, CheckCircle, XCircle, Trash2, Bell, Sun, Moon, Monitor, Video, Menu, X, Search, ShieldCheck, ShieldX } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useMessageBox } from '../components/MessageBox';
+import Logo from '../components/Logo';
 
 const AdminDashboard: React.FC = () => {
   // Real-time Data State
@@ -362,11 +363,8 @@ const AdminDashboard: React.FC = () => {
             {isMobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
           <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
-            <img src="/gold_logo.png" alt="Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain dark:invert" />
+            <Logo className="w-7 h-7 sm:w-8 sm:h-8" />
           </div>
-          <h1 className="text-base sm:text-xl font-bold tracking-tight">
-            Interview<span className="text-orange-500 font-light">Xpert</span>
-          </h1>
         </div>
 
         <div className="hidden sm:flex flex-1 justify-center">

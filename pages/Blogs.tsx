@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sun, Moon, ArrowLeft, BookOpen, PenLine, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import Logo from '../components/Logo';
 
 const BlogsContent: React.FC = () => {
     const { toggleTheme, isDark } = useTheme();
@@ -42,23 +43,20 @@ const BlogsContent: React.FC = () => {
                 }`}>
                 <Link
                     to="/"
-                    className={`flex items-center gap-2.5 font-bold text-lg sm:text-xl tracking-tight transition-opacity hover:opacity-70 ${isDark ? 'text-white' : 'text-slate-900'
-                        }`}
+                    className="flex items-center transition-opacity hover:opacity-70"
                 >
-                    <img
-                        src="/logo.png"
-                        alt="InterviewXpert Logo"
-                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover ${isDark ? 'invert hue-rotate-180' : ''}`}
+                    <Logo
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg"
+                        isDark={isDark}
                     />
-                    <span className="hidden sm:inline">InterviewXpert</span>
                 </Link>
 
                 <div className="flex items-center gap-2 sm:gap-3">
                     <Link
                         to="/"
                         className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 sm:px-4 rounded-full transition-all ${isDark
-                                ? 'text-slate-400 hover:text-white hover:bg-white/5'
-                                : 'text-slate-500 hover:text-slate-900 hover:bg-black/5'
+                            ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                            : 'text-slate-500 hover:text-slate-900 hover:bg-black/5'
                             }`}
                     >
                         <ArrowLeft size={15} />
@@ -67,8 +65,8 @@ const BlogsContent: React.FC = () => {
                     <button
                         onClick={toggleTheme}
                         className={`p-2.5 rounded-full transition-all duration-300 ${isDark
-                                ? 'bg-white/5 hover:bg-white/10 text-yellow-400'
-                                : 'bg-black/5 hover:bg-black/10 text-slate-600'
+                            ? 'bg-white/5 hover:bg-white/10 text-yellow-400'
+                            : 'bg-black/5 hover:bg-black/10 text-slate-600'
                             }`}
                         aria-label="Toggle theme"
                     >
@@ -97,8 +95,8 @@ const BlogsContent: React.FC = () => {
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.1, duration: 0.5, ease: "easeOut" }}
                         className={`inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl mb-6 sm:mb-8 ${isDark
-                                ? 'bg-gradient-to-br from-white/10 to-white/5 border border-white/10'
-                                : 'bg-gradient-to-br from-slate-100 to-white border border-slate-200/80 shadow-sm'
+                            ? 'bg-gradient-to-br from-white/10 to-white/5 border border-white/10'
+                            : 'bg-gradient-to-br from-slate-100 to-white border border-slate-200/80 shadow-sm'
                             }`}
                     >
                         <BookOpen className={`w-7 h-7 sm:w-9 sm:h-9 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
@@ -115,8 +113,8 @@ const BlogsContent: React.FC = () => {
                             Blog
                         </h1>
                         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-5 ${isDark
-                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                : 'bg-blue-50 text-blue-600 border border-blue-100'
+                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                            : 'bg-blue-50 text-blue-600 border border-blue-100'
                             }`}>
                             <Clock size={13} />
                             Coming Soon
@@ -148,15 +146,15 @@ const BlogsContent: React.FC = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${isDark
-                                        ? 'bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] hover:border-white/10'
-                                        : 'bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200'
+                                    ? 'bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                                    : 'bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200'
                                     }`}
                             >
                                 <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${topic.color === 'blue'
-                                        ? isDark ? 'bg-blue-500/15 text-blue-400' : 'bg-blue-50 text-blue-600'
-                                        : topic.color === 'purple'
-                                            ? isDark ? 'bg-purple-500/15 text-purple-400' : 'bg-purple-50 text-purple-600'
-                                            : isDark ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-50 text-amber-600'
+                                    ? isDark ? 'bg-blue-500/15 text-blue-400' : 'bg-blue-50 text-blue-600'
+                                    : topic.color === 'purple'
+                                        ? isDark ? 'bg-purple-500/15 text-purple-400' : 'bg-purple-50 text-purple-600'
+                                        : isDark ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-50 text-amber-600'
                                     }`}>
                                     <topic.icon size={17} />
                                 </div>
@@ -179,8 +177,8 @@ const BlogsContent: React.FC = () => {
                         <Link
                             to="/"
                             className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 ${isDark
-                                    ? 'bg-white text-slate-900 hover:bg-slate-100 shadow-lg shadow-white/10'
-                                    : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20'
+                                ? 'bg-white text-slate-900 hover:bg-slate-100 shadow-lg shadow-white/10'
+                                : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20'
                                 }`}
                         >
                             <ArrowLeft size={16} />
