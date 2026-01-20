@@ -7,28 +7,7 @@
   <title>InterviewXpert - AI Interview Platform</title>
   <meta name="description"
     content="InterviewXpert is an AI-powered platform designed to help you master your interview skills with real-time feedback and practice scenarios." />
-  <link id="favicon" rel="icon" type="image/png" href="/logo-black.png">
-  <!-- Dynamic favicon based on theme -->
-  <script>
-    (function () {
-      function updateFavicon() {
-        var favicon = document.getElementById('favicon');
-        if (favicon) {
-          var isDark = localStorage.theme === 'dark' ||
-            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          favicon.href = isDark ? '/logo-white.png' : '/logo-black.png';
-        }
-      }
-      // Update on load
-      updateFavicon();
-      // Update when localStorage changes
-      window.addEventListener('storage', updateFavicon);
-      // Update when system preference changes
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
-      // Expose function for theme toggle to call
-      window.updateFavicon = updateFavicon;
-    })();
-  </script>
+  <link id="favicon" rel="icon" type="image/png" href="/logo-white.png">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
