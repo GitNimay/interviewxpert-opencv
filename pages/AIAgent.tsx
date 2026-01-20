@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
+import { doc, getDoc, collection, query, where, getDocs, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../services/firebase';
 import { useAuth } from '../context/AuthContext';
 import { useAnimatedText } from '../hooks/useAnimatedText';
 import {
@@ -12,7 +14,8 @@ import {
     PanelLeftOpen,
     Trash2,
     MoreHorizontal,
-    Edit3
+    Edit3,
+    Save
 } from 'lucide-react';
 
 // --- Types ---
@@ -54,6 +57,10 @@ const AIAgent: React.FC = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
     const [isHoveringSession, setHoveringSession] = useState<string | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
+    
+    // Context State
+    const [fullProfile, setFullProfile] = useState<any>(null);
+    const [pastInterviews, setPastInterviews] = useState<any[]>([]);
 
     const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
@@ -63,6 +70,50 @@ const AIAgent: React.FC = () => {
         // Create a new session on mount
         createNewSession();
     }, []);
+
+    // Fetch User Context (Profile & Interviews)
+    useEffect(() => {
+        const fetchContext = async () => {
+            if (!user) return;
+            try {
+                // 1. Fetch Profile
+                const profileSnap = await getDoc(doc(db, 'profiles', user.uid));
+                if (profileSnap.exists()) {
+                    setFullProfile(profileSnap.data());
+                }
+
+                // 2. Fetch Interviews
+                const q = query(collection(db, 'interviews'), where('candidateUID', '==', user.uid));
+                const snap = await getDocs(q);
+                setPastInterviews(snap.docs.map(d => d.data()));
+            } catch (error) {
+                console.error("Error fetching AI context:", error);
+            }
+        };
+        fetchContext();
+    }, [user]);
+
+    // Load saved sessions from DB
+    useEffect(() => {
+        const loadSavedSessions = async () => {
+            if (!user) return;
+            try {
+                const q = query(collection(db, 'chatSessions'), where('userId', '==', user.uid));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    const dbSessions = snap.docs.map(d => d.data() as ChatSession);
+                    setSessions(prev => {
+                        const existingIds = new Set(prev.map(s => s.id));
+                        const newSessions = dbSessions.filter(s => !existingIds.has(s.id));
+                        return [...prev, ...newSessions].sort((a, b) => b.createdAt - a.createdAt);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading saved chats:", error);
+            }
+        };
+        loadSavedSessions();
+    }, [user]);
 
     useEffect(() => {
         scrollToBottom();
@@ -86,7 +137,7 @@ const AIAgent: React.FC = () => {
         if (window.innerWidth < 768) setSidebarOpen(false); // Auto close sidebar on mobile
     };
 
-    const deleteSession = (e: React.MouseEvent, id: string) => {
+    const deleteSession = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         const newSessions = sessions.filter(s => s.id !== id);
         setSessions(newSessions);
@@ -97,7 +148,32 @@ const AIAgent: React.FC = () => {
                 createNewSession();
             }
         }
+        
+        if (user) {
+            try {
+                await deleteDoc(doc(db, 'chatSessions', id));
+            } catch (error) {
+                console.error("Error deleting chat:", error);
+            }
+        }
+    };
 
+    const saveCurrentChat = async () => {
+        if (!user || !currentSessionId) return;
+        const session = sessions.find(s => s.id === currentSessionId);
+        if (!session) return;
+
+        try {
+            await setDoc(doc(db, 'chatSessions', session.id), {
+                ...session,
+                userId: user.uid,
+                updatedAt: serverTimestamp()
+            });
+            alert("Chat saved successfully!");
+        } catch (error) {
+            console.error("Error saving chat:", error);
+            alert("Failed to save chat.");
+        }
     };
 
     const handleSendMessage = async () => {
@@ -137,9 +213,26 @@ const AIAgent: React.FC = () => {
             // (SDK handles conversation history differently, but for manual construction we pass pure history + last msg)
             // But here we'll just pass the full history to the model directly if using sendMessage on a chat session object
             // For simplicity with generateContent, we pass the full list.
+            
+            // Build Context Strings
+            const profileContext = fullProfile ? `
+            FULL PROFILE DATA:
+            - Skills: ${fullProfile.skills || 'None listed'}
+            - Bio: ${fullProfile.bio || 'None'}
+            - Experience: ${fullProfile.experienceList?.map((e: any) => `${e.role} at ${e.company} (${e.duration})`).join('; ') || fullProfile.experience || 'None'}
+            - Education: ${fullProfile.educationList?.map((e: any) => `${e.degree} at ${e.school}`).join('; ') || fullProfile.education || 'None'}
+            - Projects: ${fullProfile.projects?.map((p: any) => `${p.title}: ${p.description}`).join('; ') || 'None'}
+            ` : '';
+
+            const interviewContext = pastInterviews.length > 0 ? `
+            PAST INTERVIEW SCORES:
+            ${pastInterviews.map(i => `- Role: ${i.jobTitle}, Score: ${i.score} (Resume: ${i.resumeScore}, Q&A: ${i.qnaScore})`).join('\n')}
+            ` : '';
 
             const systemInstruction = `You are a helpful, professional AI interview coach and career assistant named "Career Copilot". 
             User Context: The user's name is ${userProfile?.fullname || 'Candidate'}.
+            ${profileContext}
+            ${interviewContext}
             
             CRITICAL FORMATTING RULES (MUST FOLLOW):
             - DO NOT use any Markdown symbols like **, *, #, ##, ###, or #### 
@@ -317,6 +410,15 @@ const AIAgent: React.FC = () => {
                         </button>
                         <span className="md:hidden font-semibold text-gray-900 dark:text-white">Career Copilot</span>
                     </div>
+
+                    <button
+                        onClick={saveCurrentChat}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-500 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                        title="Save chat to database"
+                    >
+                        <Save size={18} />
+                        <span className="hidden sm:inline">Save Chat</span>
+                    </button>
                 </div>
 
                 {/* Messages */}
