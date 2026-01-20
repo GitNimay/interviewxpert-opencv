@@ -3,9 +3,9 @@
 # InterviewXpert
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://i.ibb.co/3y9DKsB6/Yellow-and-Black-Illustrative-Education-Logo-1.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://i.ibb.co/3y9DKsB6/Yellow-and-Black-Illustrative-Education-Logo-1.png">
-  <img src="https://i.ibb.co/3y9DKsB6/Yellow-and-Black-Illustrative-Education-Logo-1.png" alt="InterviewXpert Logo" width="180" style="background-color: white; padding: 10px; border-radius: 12px;"/>
+  <source media="(prefers-color-scheme: dark)" srcset="public/logo-white.png">
+  <source media="(prefers-color-scheme: light)" srcset="public/logo-black.png">
+  <img src="public/logo-black.png" alt="InterviewXpert Logo" width="180"/>
 </picture>
 
 ### **Master Your Next Interview with AI-Powered Preparation**
