@@ -1,19 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sun, Moon, ArrowLeft, BookOpen, PenLine, Sparkles, Clock, TrendingUp } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, BookOpen, Clock, Calendar, ChevronRight } from 'lucide-react';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import Logo from '../components/Logo';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebase';
+
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  imageUrl: string;
+  tags: string[];
+  readTime: string;
+  author: string;
+  createdAt: any;
+}
 
 const BlogsContent: React.FC = () => {
     const { toggleTheme, isDark } = useTheme();
+    const [blogs, setBlogs] = useState<BlogPost[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Sample upcoming blog topics
-    const upcomingTopics = [
-        { icon: TrendingUp, title: "Interview Strategies", color: "blue" },
-        { icon: PenLine, title: "Resume Tips", color: "purple" },
-        { icon: Sparkles, title: "Career Growth", color: "amber" },
-    ];
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                const q = query(collection(db, 'blogs'), orderBy('createdAt', 'desc'));
+                const snap = await getDocs(q);
+                setBlogs(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost)));
+            } catch (error) {
+                console.error("Error fetching blogs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBlogs();
+    }, []);
 
     return (
         <div className={`min-h-screen transition-colors duration-500 ${isDark
@@ -82,7 +106,7 @@ const BlogsContent: React.FC = () => {
             </nav>
 
             {/* Main Content */}
-            <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] px-5 sm:px-8 py-12 sm:py-16">
+            <main className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -112,63 +136,87 @@ const BlogsContent: React.FC = () => {
                             }`}>
                             Blog
                         </h1>
-                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-5 ${isDark
-                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                            : 'bg-blue-50 text-blue-600 border border-blue-100'
-                            }`}>
-                            <Clock size={13} />
-                            Coming Soon
-                        </div>
+                        <p className={`text-lg ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                            Insights, strategies, and tips for your career journey.
+                        </p>
                     </motion.div>
+                </motion.div>
 
-                    {/* Description */}
-                    <motion.p
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
-                        className={`text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 ${isDark ? 'text-slate-400' : 'text-slate-600'
-                            }`}
-                    >
-                        We're preparing thoughtful content on interview preparation, career development, and industry insights.
-                    </motion.p>
-
-                    {/* Upcoming Topics */}
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                ) : blogs.length === 0 ? (
+                    <div className="text-center py-20 opacity-60">
+                        <p className="text-xl">No blog posts available yet.</p>
+                        <p className="text-sm mt-2">Check back soon for updates!</p>
+                    </div>
+                ) : (
                     <motion.div
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4, duration: 0.6 }}
-                        className="flex flex-col gap-2.5 sm:gap-3 mb-8 sm:mb-10"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
                     >
-                        {upcomingTopics.map((topic, index) => (
+                        {blogs.map((blog, index) => (
                             <motion.div
-                                key={topic.title}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${isDark
-                                    ? 'bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] hover:border-white/10'
-                                    : 'bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200'
+                                key={blog.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className={`group rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 ${isDark
+                                    ? 'bg-[#111] border-white/5 hover:border-white/10 hover:shadow-2xl hover:shadow-blue-900/10'
+                                    : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-xl hover:shadow-blue-500/5'
                                     }`}
                             >
-                                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${topic.color === 'blue'
-                                    ? isDark ? 'bg-blue-500/15 text-blue-400' : 'bg-blue-50 text-blue-600'
-                                    : topic.color === 'purple'
-                                        ? isDark ? 'bg-purple-500/15 text-purple-400' : 'bg-purple-50 text-purple-600'
-                                        : isDark ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-50 text-amber-600'
-                                    }`}>
-                                    <topic.icon size={17} />
+                                {/* Image */}
+                                <Link to={`/blog/${blog.id}`} className="block aspect-video w-full overflow-hidden bg-gray-100 dark:bg-white/5 relative">
+                                    {blog.imageUrl ? (
+                                        <img src={blog.imageUrl} alt={blog.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-700">
+                                            <BookOpen size={48} />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-4 left-4 flex gap-2">
+                                        {Array.isArray(blog.tags) && blog.tags.slice(0, 2).map((tag, i) => (
+                                            <span key={i} className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/90 dark:bg-black/80 backdrop-blur text-blue-600 dark:text-blue-400 rounded-lg shadow-sm">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </Link>
+
+                                {/* Content */}
+                                <div className="p-6">
+                                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                        <span className="flex items-center gap-1"><Calendar size={12} /> {blog.createdAt?.toDate ? blog.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent'}</span>
+                                        <span className="flex items-center gap-1"><Clock size={12} /> {blog.readTime || '5 min read'}</span>
+                                    </div>
+                                    
+                                    <Link to={`/blog/${blog.id}`}>
+                                        <h3 className={`text-xl font-bold mb-3 line-clamp-2 ${isDark ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>
+                                            {blog.title}
+                                        </h3>
+                                    </Link>
+                                    
+                                    <p className={`text-sm line-clamp-3 mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {blog.excerpt}
+                                    </p>
+
+                                    <Link 
+                                        to={`/blog/${blog.id}`}
+                                        className={`text-sm font-bold flex items-center gap-1 ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                                    >
+                                        Read Article <ChevronRight size={14} />
+                                    </Link>
                                 </div>
-                                <span className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                                    {topic.title}
-                                </span>
-                                <span className={`ml-auto text-xs ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                                    Soon
-                                </span>
                             </motion.div>
                         ))}
                     </motion.div>
-
-                    {/* Back Button */}
+                )}
+                
+                <div className="mt-16 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -185,33 +233,7 @@ const BlogsContent: React.FC = () => {
                             Back to Home
                         </Link>
                     </motion.div>
-                </motion.div>
-
-                {/* Subtle loading indicator */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1, duration: 0.5 }}
-                    className="absolute bottom-8 sm:bottom-12 flex items-center gap-1.5"
-                >
-                    {[0, 1, 2].map((i) => (
-                        <motion.div
-                            key={i}
-                            animate={{
-                                scale: [1, 1.2, 1],
-                                opacity: [0.3, 0.7, 0.3]
-                            }}
-                            transition={{
-                                duration: 1.5,
-                                repeat: Infinity,
-                                delay: i * 0.2,
-                                ease: "easeInOut"
-                            }}
-                            className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-slate-500' : 'bg-slate-400'
-                                }`}
-                        />
-                    ))}
-                </motion.div>
+                </div>
             </main>
         </div>
     );

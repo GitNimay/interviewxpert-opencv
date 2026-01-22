@@ -213,6 +213,18 @@ const RecruiterDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="bg-white dark:bg-[#111] p-6 rounded-2xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 transition-colors shadow-sm dark:shadow-none kpi-card cursor-pointer" onClick={() => window.location.hash = '/recruiter/tests'}>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Assessments</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Manage Tests</h3>
+            </div>
+            <div className="p-3 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl">
+              <i className="fas fa-clipboard-list"></i>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Analytics Section - Bento Grid Style */}

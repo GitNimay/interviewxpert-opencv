@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { collection, query, where, doc, deleteDoc, setDoc, serverTimestamp, updateDoc, orderBy, onSnapshot } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
@@ -6,7 +7,7 @@ import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
 import { db, auth } from '../services/firebase';
 import { RevenueAreaChart, UserPieChart, JobBarChart } from '../components/AdminCharts';
 import { GShapeAnimation } from '../components/AdminAnimations';
-import { Users, FileText, DollarSign, UserPlus, Briefcase, CheckCircle, XCircle, Trash2, Bell, Sun, Moon, Monitor, Video, Menu, X, Search, ShieldCheck, ShieldX } from 'lucide-react';
+import { Users, FileText, DollarSign, UserPlus, Briefcase, CheckCircle, XCircle, Trash2, Bell, Sun, Moon, Monitor, Video, Menu, X, Search, ShieldCheck, ShieldX, BookOpen } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useMessageBox } from '../components/MessageBox';
 import Logo from '../components/Logo';
@@ -29,6 +30,7 @@ const AdminDashboard: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const messageBox = useMessageBox();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   // GSAP Animation Refs
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -472,11 +474,16 @@ const AdminDashboard: React.FC = () => {
               { id: 'requests', label: 'Requests', icon: UserPlus, count: requests.length },
               { id: 'users', label: 'Users', icon: Users, count: users.length },
               { id: 'jobs', label: 'Jobs', icon: FileText, count: jobs.length },
-              { id: 'transactions', label: 'Transactions', icon: DollarSign }
+              { id: 'transactions', label: 'Transactions', icon: DollarSign },
+              { id: 'blogs', label: 'Manage Blogs', icon: BookOpen }
             ].map(item => (
               <button
                 key={item.id}
-                onClick={() => { setActiveTab(item.id as any); setIsMobileSidebarOpen(false); }}
+                onClick={() => { 
+                  if (item.id === 'blogs') navigate('/admin/blogs');
+                  else setActiveTab(item.id as any); 
+                  setIsMobileSidebarOpen(false); 
+                }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id
                   ? 'bg-primary text-white shadow-lg shadow-primary/20'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
@@ -503,11 +510,15 @@ const AdminDashboard: React.FC = () => {
             { id: 'requests', label: 'Requests', icon: UserPlus, count: requests.length },
             { id: 'users', label: 'Users', icon: Users, count: users.length },
             { id: 'jobs', label: 'Jobs', icon: FileText, count: jobs.length },
-            { id: 'transactions', label: 'Transactions', icon: DollarSign }
+            { id: 'transactions', label: 'Transactions', icon: DollarSign },
+            { id: 'blogs', label: 'Manage Blogs', icon: BookOpen }
           ].map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => {
+                if (item.id === 'blogs') navigate('/admin/blogs');
+                else setActiveTab(item.id as any);
+              }}
               className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id
                 ? 'bg-primary text-white shadow-lg shadow-primary/20'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'

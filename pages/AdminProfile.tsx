@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../services/firebase';
 import { useTheme } from '../context/ThemeContext';
-import { User, Mail, Calendar, Shield, Sun, Moon, Monitor, ArrowLeft, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Calendar, Shield, Sun, Moon, Monitor, ArrowLeft, Edit2, Save, X, FileText } from 'lucide-react';
 import gsap from 'gsap';
 import { signOut } from 'firebase/auth';
 
@@ -153,6 +153,11 @@ const AdminProfile: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
+
+                            <button onClick={() => navigate('/admin/blogs')} className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 border-b border-gray-100 dark:border-white/5">
+                                <FileText size={16} />
+                                Manage Blogs
+                            </button>
 
                             <button onClick={() => signOut(auth)} className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2">
                                 Sign Out

@@ -28,7 +28,7 @@ Instructions:
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { text: prompt },
@@ -42,7 +42,7 @@ Instructions:
       }
     });
 
-    const text = response.text || "";
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
     const cleanText = text.replace(/^\s*[\d\.\-\*\+]+\s*/gm, '').replace(/\*\*/g, '').trim();
     return cleanText.split('\n').map(q => q.trim()).filter(q => q && q.length > 15).slice(0, 5);
   } catch (error: any) {
@@ -102,7 +102,7 @@ Overall Score: [Score]/100`;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { text: feedbackPrompt },
@@ -115,7 +115,7 @@ Overall Score: [Score]/100`;
         ]
       }
     });
-    return response.text || "AI feedback generation failed.";
+    return response.candidates?.[0]?.content?.parts?.[0]?.text || "AI feedback generation failed.";
   } catch (error: any) {
     console.error("Gemini Feedback Error:", error);
     throw new Error(error.message);

@@ -255,7 +255,7 @@ const AIAgent: React.FC = () => {
             Remember: Keep responses well-structured but clean without any special formatting symbols.`;
 
             const response = await genAI.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-1.5-flash",
                 contents: [
                     { role: "user", parts: [{ text: systemInstruction }] },
                     ...history

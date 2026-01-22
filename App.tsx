@@ -26,6 +26,13 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProfile from './pages/AdminProfile';
 import AIAgent from './pages/AIAgent';
 import Blogs from './pages/Blogs';
+import AdminBlogs from './pages/AdminBlogs';
+import BlogDetail from './pages/BlogDetail';
+import RecruiterTests from './pages/RecruiterTests';
+import CreateTest from './pages/CreateTest';
+import TakeTest from './pages/TakeTest';
+import TestResults from './pages/TestResults';
+import CandidateTests from './pages/CandidateTests';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; role?: 'recruiter' | 'candidate' | 'admin' }> = ({ children, role }) => {
   const { user, userProfile, loading } = useAuth();
@@ -89,6 +96,11 @@ const App: React.FC = () => {
             <Route path="/" element={<HomeRoute />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/blogs" element={<Blogs />} />
+            <Route path="/blog/:id" element={
+              <ThemeProvider>
+                <BlogDetail />
+              </ThemeProvider>
+            } />
 
             {/* Admin Routes (No Standard Layout) */}
             <Route path="/admin" element={
@@ -101,11 +113,23 @@ const App: React.FC = () => {
                 <ProtectedRoute role="admin"><AdminProfile /></ProtectedRoute>
               </ThemeProvider>
             } />
+            <Route path="/admin/blogs" element={
+              <ThemeProvider>
+                <ProtectedRoute role="admin"><AdminBlogs /></ProtectedRoute>
+              </ThemeProvider>
+            } />
 
             {/* Interview Route (No Layout) */}
             <Route path="/interview/:jobId" element={
               <ThemeProvider>
                 <ProtectedRoute role="candidate"><InterviewWizard /></ProtectedRoute>
+              </ThemeProvider>
+            } />
+
+            {/* Test Taking Route (No Layout) */}
+            <Route path="/candidate/test/:testId" element={
+              <ThemeProvider>
+                <ProtectedRoute role="candidate"><TakeTest /></ProtectedRoute>
               </ThemeProvider>
             } />
 
@@ -142,6 +166,15 @@ const App: React.FC = () => {
                   <Route path="/recruiter/requests" element={
                     <ProtectedRoute role="recruiter"><InterviewRequests /></ProtectedRoute>
                   } />
+                  <Route path="/recruiter/tests" element={
+                    <ProtectedRoute role="recruiter"><RecruiterTests /></ProtectedRoute>
+                  } />
+                  <Route path="/recruiter/tests/create" element={
+                    <ProtectedRoute role="recruiter"><CreateTest /></ProtectedRoute>
+                  } />
+                  <Route path="/recruiter/tests/:testId/results" element={
+                    <ProtectedRoute role="recruiter"><TestResults /></ProtectedRoute>
+                  } />
 
                   {/* Candidate Routes */}
                   <Route path="/candidate/jobs" element={
@@ -170,6 +203,9 @@ const App: React.FC = () => {
                   } />
                   <Route path="/candidate/payment" element={
                     <ProtectedRoute role="candidate"><Payment /></ProtectedRoute>
+                  } />
+                  <Route path="/candidate/tests" element={
+                    <ProtectedRoute role="candidate"><CandidateTests /></ProtectedRoute>
                   } />
 
                   {/* Shared/Public */}
