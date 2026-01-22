@@ -11,6 +11,7 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
 import { Marquee } from '../components/landing/Marquee';
 import Logo from '../components/Logo';
+import LandingJobs from '../components/LandingJobs';
 
 // --- Components ---
 
@@ -184,6 +185,7 @@ const Navbar: React.FC = () => {
   });
 
   const navLinks = [
+    { name: "Jobs", href: "#jobs" },
     { name: "Features", href: "#features" },
     { name: "How it Works", href: "#process" },
     { name: "Pricing", href: "#pricing" },
@@ -191,10 +193,23 @@ const Navbar: React.FC = () => {
     { name: "Blogs", href: "/blogs", isRoute: true },
   ];
 
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const targetId = href.replace('#', '');
+    const element = document.getElementById(targetId);
+    if (element) {
+      const offset = 80; // Navbar height adjustment
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - offset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
       <motion.nav
-        className={`fixed top-0 inset-x-0 z-navbar flex justify-center pt-4 md:pt-6 px-4 transition-all duration-300`}
+        className={`fixed top-0 inset-x-0 z-50 flex justify-center pt-4 md:pt-6 px-4 transition-all duration-300`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
@@ -204,8 +219,8 @@ const Navbar: React.FC = () => {
             relative flex items-center justify-between px-6 py-3 rounded-full transition-all duration-300 border
             ${isScrolled
               ? isDark
-                ? 'w-full max-w-4xl bg-black/80 backdrop-blur-md border-white/10 shadow-2xl shadow-indigo-500/10'
-                : 'w-full max-w-4xl bg-white/80 backdrop-blur-md border-slate-200 shadow-xl shadow-slate-200/50'
+                ? 'w-full max-w-5xl bg-black/80 backdrop-blur-md border-white/10 shadow-2xl shadow-indigo-500/10'
+                : 'w-full max-w-5xl bg-white/80 backdrop-blur-md border-slate-200 shadow-xl shadow-slate-200/50'
               : 'w-full max-w-7xl bg-transparent border-transparent'
             }
           `}
@@ -216,7 +231,7 @@ const Navbar: React.FC = () => {
           </a>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+          <div className="hidden lg:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
             {navLinks.map((link) => (
               link.isRoute ? (
                 <Link
@@ -230,6 +245,7 @@ const Navbar: React.FC = () => {
                 <a
                   key={link.name}
                   href={link.href}
+                  onClick={(e) => handleScroll(e, link.href)}
                   className={`text-sm font-medium transition-colors ${isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
                 >
                   {link.name}
@@ -239,7 +255,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* CTAs */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -266,7 +282,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-2">
             {/* Mobile Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -294,7 +310,7 @@ const Navbar: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className={`fixed inset-0 z-40 pt-24 px-6 md:hidden ${isDark ? 'bg-slate-950/95' : 'bg-white/95 backdrop-blur-md'}`}
+          className={`fixed inset-0 z-40 pt-24 px-6 lg:hidden ${isDark ? 'bg-slate-950/95' : 'bg-white/95 backdrop-blur-md'}`}
         >
           <div className="flex flex-col gap-6">
             {navLinks.map((link) => (
@@ -311,7 +327,7 @@ const Navbar: React.FC = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => handleScroll(e, link.href)}
                   className={`text-2xl font-display font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                 >
                   {link.name}
@@ -1255,6 +1271,7 @@ const Home: React.FC = () => {
           <NeuralBackground />
           <Hero />
           <WhoItsFor />
+          <LandingJobs />
           <Features />
           <HowItWorks />
           <LiveDemo />

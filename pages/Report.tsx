@@ -30,9 +30,13 @@ const InterviewReport: React.FC = () => {
         setReport({ id: docSnap.id, ...docSnap.data() } as Interview);
 
         if (docSnap.data().jobId) {
-          const jobSnap = await getDoc(doc(db, 'jobs', docSnap.data().jobId));
-          if (jobSnap.exists()) {
-            setCompanyName(jobSnap.data().companyName);
+          try {
+            const jobSnap = await getDoc(doc(db, 'jobs', docSnap.data().jobId));
+            if (jobSnap.exists()) {
+              setCompanyName(jobSnap.data().companyName);
+            }
+          } catch (error) {
+            console.log("Job details fetch failed (public access)", error);
           }
         }
 
@@ -44,16 +48,24 @@ const InterviewReport: React.FC = () => {
         const candidateId = data.candidateUID || data.candidateId || data.userId || data.uid;
 
         if (candidateId) {
-          const profileSnap = await getDoc(doc(db, 'profiles', candidateId));
-          if (profileSnap.exists()) {
-            setProfile(profileSnap.data());
+          try {
+            const profileSnap = await getDoc(doc(db, 'profiles', candidateId));
+            if (profileSnap.exists()) {
+              setProfile(profileSnap.data());
+            }
+          } catch (error) {
+            console.log("Profile fetch restricted or failed", error);
           }
 
-          const userSnap = await getDoc(doc(db, 'users', candidateId));
-          if (userSnap.exists()) {
-            setCandidateEmail(userSnap.data().email);
-          } else if (data.candidateEmail) {
-            setCandidateEmail(data.candidateEmail);
+          try {
+            const userSnap = await getDoc(doc(db, 'users', candidateId));
+            if (userSnap.exists()) {
+              setCandidateEmail(userSnap.data().email);
+            } else if (data.candidateEmail) {
+              setCandidateEmail(data.candidateEmail);
+            }
+          } catch (error) {
+            if (data.candidateEmail) setCandidateEmail(data.candidateEmail);
           }
         }
       }
@@ -326,6 +338,52 @@ const InterviewReport: React.FC = () => {
     doc.save(`${report.candidateName.replace(/\s+/g, '_')}_Report.pdf`);
   };
 
+  const handleShare = async () => {
+    // Ensure we share the clean, direct URL (handling HashRouter correctly)
+    const url = window.location.href.split('?')[0];
+
+    // Method 1: Modern Clipboard API (Secure Contexts)
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        alert("Report URL copied to clipboard!");
+        return;
+      }
+    } catch (err) {
+      console.warn("Clipboard API failed, trying fallback...", err);
+    }
+
+    // Method 2: Fallback (HTTP/Mobile)
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      
+      // Ensure element is part of DOM but invisible
+      textArea.style.position = "fixed";
+      textArea.style.left = "0";
+      textArea.style.top = "0";
+      textArea.style.opacity = "0";
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      textArea.setSelectionRange(0, 99999); // For mobile devices
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        alert("Report URL copied to clipboard!");
+        return;
+      }
+    } catch (e) {
+      console.error("Fallback failed", e);
+    }
+
+    // Method 3: Ultimate Fallback (Manual)
+    prompt("Copy this link to share:", url);
+  };
+
   const formatFeedback = (text: string) => {
     return text
       .replace(/\*\*(.*?)\*\*/g, `<strong class="font-semibold ${isDark ? 'text-white' : 'text-gray-900'}">$1</strong>`)
@@ -367,13 +425,13 @@ const InterviewReport: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3 w-full lg:w-auto">
-            {userProfile?.role === 'recruiter' && (
-              <div className="relative">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 w-full lg:w-auto">
+            {userProfile?.role === 'recruiter' ? (
+              <div className="relative w-full sm:w-auto">
                 <select
                   value={report.status || 'Pending'}
                   onChange={(e) => handleStatusChange(e.target.value)}
-                  className={`text-sm font-medium border pl-3 pr-8 py-2 rounded-xl cursor-pointer outline-none transition-all appearance-none bg-no-repeat bg-[right_0.75rem_center] ${isDark ? 'border-white/10 ring-1 ring-white/5 focus:ring-blue-500/50 hover:bg-white/5 text-white bg-[#1a1a1a]' : 'border-gray-200 ring-1 ring-gray-100 focus:ring-blue-500/50 hover:bg-gray-50 text-gray-900 bg-white'}`}
+                  className={`w-full sm:w-auto text-sm font-medium border pl-3 pr-8 py-2.5 rounded-xl cursor-pointer outline-none transition-all appearance-none bg-no-repeat bg-[right_0.75rem_center] ${isDark ? 'border-white/10 ring-1 ring-white/5 focus:ring-blue-500/50 hover:bg-white/5 text-white bg-[#1a1a1a]' : 'border-gray-200 ring-1 ring-gray-100 focus:ring-blue-500/50 hover:bg-gray-50 text-gray-900 bg-white'}`}
                   style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='${isDark ? '%239ca3af' : '%236b7280'}' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")` }}
                 >
                   <option value="Pending">Pending</option>
@@ -383,32 +441,54 @@ const InterviewReport: React.FC = () => {
                   <option value="Rejected">Rejected</option>
                 </select>
               </div>
+            ) : (
+              <div className={`h-10 px-4 flex items-center justify-center rounded-xl text-sm font-bold border w-full sm:w-auto ${
+                report.status === 'Hired' ? (isDark ? 'bg-green-900/30 text-green-400 border-green-800' : 'bg-green-50 text-green-700 border-green-200') :
+                report.status === 'Rejected' ? (isDark ? 'bg-red-900/30 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200') :
+                (isDark ? 'bg-yellow-900/30 text-yellow-400 border-yellow-800' : 'bg-yellow-50 text-yellow-700 border-yellow-200')
+              }`}>
+                {report.status || 'Pending'}
+              </div>
             )}
 
             {/* Action Buttons */}
-            <button 
-              onClick={() => report.candidateResumeURL ? setSelectedResume(report.candidateResumeURL) : alert("No resume uploaded. Profile information was used for this interview.")} 
-              className={`h-10 px-4 rounded-xl font-medium text-sm flex items-center gap-2 transition-all border ${isDark ? 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white hover:border-white/20' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300'} ${!report.candidateResumeURL ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <i className="far fa-file-alt text-lg"></i>
-              <span>Resume</span>
-            </button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button 
+                onClick={handleShare} 
+                className={`flex-1 sm:flex-none h-10 px-3 sm:px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all border ${isDark ? 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white hover:border-white/20' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300'}`}
+                title="Share Report URL"
+              >
+                <i className="fas fa-share-alt text-lg"></i>
+                <span className="hidden sm:inline">Share</span>
+              </button>
 
-            <button 
-              onClick={handleDownloadPDF} 
-              className={`h-10 px-4 rounded-xl font-medium text-sm flex items-center gap-2 transition-all border ${isDark ? 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white hover:border-white/20' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300'}`}
-            >
-              <i className="far fa-file-pdf text-lg"></i>
-              <span>Download</span>
-            </button>
+              <button 
+                onClick={() => report.candidateResumeURL ? setSelectedResume(report.candidateResumeURL) : alert("No resume uploaded. Profile information was used for this interview.")} 
+                className={`flex-1 sm:flex-none h-10 px-3 sm:px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all border ${isDark ? 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white hover:border-white/20' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300'} ${!report.candidateResumeURL ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title="View Resume"
+              >
+                <i className="far fa-file-alt text-lg"></i>
+                <span className="hidden sm:inline">Resume</span>
+              </button>
 
-            <button 
-              onClick={() => setShowProfile(true)} 
-              className={`h-10 px-5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg hover:-translate-y-0.5 active:translate-y-0 ${isDark ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/20' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30'}`}
-            >
-              <i className="far fa-user-circle text-lg"></i>
-              <span>Profile</span>
-            </button>
+              <button 
+                onClick={handleDownloadPDF} 
+                className={`flex-1 sm:flex-none h-10 px-3 sm:px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all border ${isDark ? 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white hover:border-white/20' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300'}`}
+                title="Download Report"
+              >
+                <i className="far fa-file-pdf text-lg"></i>
+                <span className="hidden sm:inline">Download</span>
+              </button>
+
+              <button 
+                onClick={() => setShowProfile(true)} 
+                className={`flex-1 sm:flex-none h-10 px-3 sm:px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:-translate-y-0.5 active:translate-y-0 ${isDark ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/20' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30'}`}
+                title="View Profile"
+              >
+                <i className="far fa-user-circle text-lg"></i>
+                <span className="hidden sm:inline">Profile</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -572,7 +652,7 @@ const InterviewReport: React.FC = () => {
 
       {/* Video Modal */}
       {selectedVideo && (
-        <div className={`fixed inset-0 ${isDark ? 'bg-black/90' : 'bg-white/90'} backdrop-blur-md z-[150] flex items-center justify-center p-6`} onClick={() => setSelectedVideo(null)}>
+        <div className={`fixed inset-0 ${isDark ? 'bg-black/90' : 'bg-white/90'} backdrop-blur-md z-[9999] flex items-center justify-center p-6`} onClick={() => setSelectedVideo(null)}>
           <div className={`${isDark ? 'bg-black' : 'bg-black'} rounded-2xl overflow-hidden max-w-5xl w-full shadow-2xl ring-1 ${isDark ? 'ring-white/20' : 'ring-gray-200'}`} onClick={e => e.stopPropagation()}>
             <video src={selectedVideo} controls autoPlay className="w-full h-auto max-h-[85vh]" />
           </div>
@@ -584,7 +664,7 @@ const InterviewReport: React.FC = () => {
 
       {/* Resume Modal */}
       {selectedResume && (
-        <div className={`fixed inset-0 ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-sm z-[150] flex items-center justify-center p-4`} onClick={() => setSelectedResume(null)}>
+        <div className={`fixed inset-0 ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-sm z-[9999] flex items-center justify-center p-4`} onClick={() => setSelectedResume(null)}>
           <div className={`${isDark ? 'bg-[#111] border-white/10' : 'bg-white border-gray-200'} rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col border`} onClick={e => e.stopPropagation()}>
             <div className={`flex justify-between items-center p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
               <h3 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Parsed Resume</h3>
@@ -601,7 +681,7 @@ const InterviewReport: React.FC = () => {
 
       {/* Profile Modal */}
       {showProfile && (
-        <div className={`fixed inset-0 ${isDark ? 'bg-black/80' : 'bg-white/80'} backdrop-blur-sm z-[150] flex items-center justify-center sm:p-6`} onClick={() => setShowProfile(false)}>
+        <div className={`fixed inset-0 ${isDark ? 'bg-black/80' : 'bg-white/80'} backdrop-blur-sm z-[9999] flex items-center justify-center sm:p-6`} onClick={() => setShowProfile(false)}>
           <div className={`${isDark ? 'bg-[#111] border-white/10' : 'bg-white border-gray-100'} rounded-2xl shadow-xl border w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200`} onClick={e => e.stopPropagation()}>
             <div className={`p-6 border-b ${isDark ? 'border-white/10 bg-[#111]/95' : 'border-gray-100 bg-white/95'} flex items-center justify-between sticky top-0 backdrop-blur-sm z-10`}>
               <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Candidate Profile</h3>

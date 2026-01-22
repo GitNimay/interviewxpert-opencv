@@ -46,11 +46,8 @@ service cloud.firestore {
       allow read, write: if request.auth != null 
                           && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
 
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-
-      allow read: if request.auth != null
-                  && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'recruiter';
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     // --- Jobs Collection Rules ---
@@ -75,12 +72,7 @@ service cloud.firestore {
       allow create: if request.auth != null
                     && request.resource.data.candidateUID == request.auth.uid;
 
-      allow read: if request.auth != null
-                  && (
-                       request.auth.uid == resource.data.candidateUID
-                       ||
-                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'recruiter'
-                     );
+      allow read: if true;
 
       allow update: if request.auth != null
                     && exists(/databases/$(database)/documents/jobs/$(resource.data.jobId))

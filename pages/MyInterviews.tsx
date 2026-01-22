@@ -3,7 +3,6 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { Link } from 'react-router-dom';
 import { Interview } from '../types';
-import InterviewReportModal from '../components/InterviewReportModal';
 
 const MyInterviews: React.FC = () => {
   const [realInterviews, setRealInterviews] = useState<Interview[]>([]);
@@ -12,8 +11,6 @@ const MyInterviews: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('newest');
   const [activeTab, setActiveTab] = useState<'real' | 'mock'>('real');
-  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Use onAuthStateChanged to wait for the user session to initialize
@@ -225,24 +222,18 @@ const MyInterviews: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-gray-100 dark:border-white/5 mt-auto relative z-10">
-                  <button
-                    onClick={() => { setSelectedInterview(interview); setIsModalOpen(true); }}
+                  <Link
+                    to={`/report/${interview.id}`}
                     className="flex items-center justify-center w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/5 text-gray-700 dark:text-gray-300 hover:bg-primary hover:text-white hover:border-primary dark:hover:bg-primary dark:hover:border-primary rounded-xl transition-all font-semibold text-sm group-hover:shadow-md"
                   >
                     View Full Report <i className="fas fa-arrow-right ml-2"></i>
-                  </button>
+                  </Link>
                 </div>
               </div>
             );
           })}
         </div>
       )}
-
-      <InterviewReportModal
-        interview={selectedInterview}
-        isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setSelectedInterview(null); }}
-      />
     </div>
   );
 };

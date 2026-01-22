@@ -109,6 +109,13 @@ const App: React.FC = () => {
               </ThemeProvider>
             } />
 
+            {/* Public Report Route (No Auth Required) */}
+            <Route path="/report/:interviewId" element={
+              <ThemeProvider>
+                <InterviewReport />
+              </ThemeProvider>
+            } />
+
             {/* Protected Routes (With Layout) */}
             <Route path="/*" element={
               <Layout>
@@ -166,9 +173,6 @@ const App: React.FC = () => {
                   } />
 
                   {/* Shared/Public */}
-                  <Route path="/report/:interviewId" element={
-                    <ProtectedRoute><InterviewReport /></ProtectedRoute>
-                  } />
                   <Route path="/profile" element={
                     <ProtectedRoute><Profile /></ProtectedRoute>
                   } />
