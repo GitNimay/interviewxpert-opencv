@@ -57,7 +57,7 @@ const AIAgent: React.FC = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
     const [isHoveringSession, setHoveringSession] = useState<string | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
-    
+
     // Context State
     const [fullProfile, setFullProfile] = useState<any>(null);
     const [pastInterviews, setPastInterviews] = useState<any[]>([]);
@@ -148,7 +148,7 @@ const AIAgent: React.FC = () => {
                 createNewSession();
             }
         }
-        
+
         if (user) {
             try {
                 await deleteDoc(doc(db, 'chatSessions', id));
@@ -213,7 +213,7 @@ const AIAgent: React.FC = () => {
             // (SDK handles conversation history differently, but for manual construction we pass pure history + last msg)
             // But here we'll just pass the full history to the model directly if using sendMessage on a chat session object
             // For simplicity with generateContent, we pass the full list.
-            
+
             // Build Context Strings
             const profileContext = fullProfile ? `
             FULL PROFILE DATA:
@@ -255,7 +255,7 @@ const AIAgent: React.FC = () => {
             Remember: Keep responses well-structured but clean without any special formatting symbols.`;
 
             const response = await genAI.models.generateContent({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [
                     { role: "user", parts: [{ text: systemInstruction }] },
                     ...history

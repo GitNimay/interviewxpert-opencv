@@ -19,14 +19,14 @@ const TakeTest: React.FC = () => {
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
 
-  const handleSubmitRef = useRef<() => void>(() => {});
+  const handleSubmitRef = useRef<() => void>(() => { });
 
   useEffect(() => {
     const fetchTest = async () => {
       if (!testId) return;
       const snap = await getDoc(doc(db, 'tests', testId));
       if (snap.exists()) {
-        const testData = { id: snap.id, ...snap.data() };
+        const testData = { id: snap.id, ...snap.data() } as any;
         setTest(testData);
         if (testData.duration && !isNaN(Number(testData.duration))) {
           setTimeLeft(testData.duration * 60);
@@ -69,7 +69,7 @@ const TakeTest: React.FC = () => {
   const handleSubmit = async () => {
     if (!auth.currentUser || !test || !test.questions) return;
     setSubmitting(true);
-    
+
     let score = 0;
     let feedback = '';
 
@@ -83,7 +83,7 @@ const TakeTest: React.FC = () => {
       // AI Grading for Coding
       try {
         const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-        
+
         const prompt = `Evaluate this code submission for the problem: "${test.questions[currentQ].title}".
         Description: ${test.questions[currentQ].description}
         Language: ${codeLang}
@@ -91,9 +91,9 @@ const TakeTest: React.FC = () => {
         ${answers[currentQ] || ''}
         
         Return ONLY a JSON object: { "score": number (0-100), "feedback": "string" }. Score based on correctness and logic.`;
-        
+
         const response = await genAI.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.5-flash",
           contents: {
             parts: [{ text: prompt }]
           }
@@ -209,11 +209,10 @@ const TakeTest: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => handleAnswer(i)}
-                  className={`w-full text-left p-4 rounded-xl border transition-all ${
-                    answers[currentQ] === i 
-                      ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-700 dark:text-blue-300' 
-                      : 'bg-gray-50 dark:bg-[#1a1a1a] border-transparent hover:bg-gray-100 dark:hover:bg-white/5'
-                  }`}
+                  className={`w-full text-left p-4 rounded-xl border transition-all ${answers[currentQ] === i
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-700 dark:text-blue-300'
+                    : 'bg-gray-50 dark:bg-[#1a1a1a] border-transparent hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
                 >
                   {opt}
                 </button>
@@ -233,7 +232,7 @@ const TakeTest: React.FC = () => {
                 <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap mb-6 text-sm leading-relaxed">
                   {question.description || 'No description provided.'}
                 </div>
-                
+
                 <div className="mt-6">
                   <h4 className="text-sm font-bold uppercase text-gray-500 dark:text-gray-400 mb-3 tracking-wider">Test Cases</h4>
                   <div className="bg-gray-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-gray-200 dark:border-white/5 font-mono text-sm text-gray-700 dark:text-gray-300">
@@ -253,8 +252,8 @@ const TakeTest: React.FC = () => {
                     <span className="text-xs font-medium text-gray-300">Code Editor</span>
                   </div>
                   <div className="h-4 w-px bg-[#444]"></div>
-                  <select 
-                    value={codeLang} 
+                  <select
+                    value={codeLang}
                     onChange={e => setCodeLang(e.target.value)}
                     className="bg-[#333] text-gray-200 text-xs rounded px-2 py-1 border border-[#444] focus:outline-none focus:border-blue-500 hover:bg-[#3c3c3c] transition-colors cursor-pointer"
                   >
@@ -265,9 +264,9 @@ const TakeTest: React.FC = () => {
                   </select>
                 </div>
                 <div className="flex items-center gap-3">
-                   <button className="p-1.5 hover:bg-[#333] rounded text-gray-400 hover:text-white transition-colors" title="Settings">
-                     <Settings size={14} />
-                   </button>
+                  <button className="p-1.5 hover:bg-[#333] rounded text-gray-400 hover:text-white transition-colors" title="Settings">
+                    <Settings size={14} />
+                  </button>
                 </div>
               </div>
 
@@ -287,18 +286,18 @@ const TakeTest: React.FC = () => {
                   style={{ tabSize: 2 }}
                 />
               </div>
-              
+
               {/* Editor Footer / Console */}
               <div className="bg-[#252526] border-t border-[#333]">
-                 <div className="flex items-center justify-between px-4 py-2">
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <Terminal size={12} />
-                      <span>Console Output</span>
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded transition-colors">
-                      <Play size={12} /> Run Code
-                    </button>
-                 </div>
+                <div className="flex items-center justify-between px-4 py-2">
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Terminal size={12} />
+                    <span>Console Output</span>
+                  </div>
+                  <button className="flex items-center gap-2 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded transition-colors">
+                    <Play size={12} /> Run Code
+                  </button>
+                </div>
               </div>
             </div>
           </div>

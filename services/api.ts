@@ -28,7 +28,7 @@ Instructions:
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: {
         parts: [
           { text: prompt },
@@ -102,7 +102,7 @@ Overall Score: [Score]/100`;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: {
         parts: [
           { text: feedbackPrompt },

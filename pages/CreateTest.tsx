@@ -26,12 +26,12 @@ const CreateTest: React.FC = () => {
     if (!aiPrompt) return;
     setLoading(true);
     try {
-      const prompt = type === 'aptitude' 
+      const prompt = type === 'aptitude'
         ? `Generate 5 aptitude multiple choice questions about "${aiPrompt}". Return ONLY a JSON array with format: [{ "question": "...", "options": ["A", "B", "C", "D"], "correctIndex": 0 }] (0-3 index). No markdown.`
         : `Generate 1 coding problem about "${aiPrompt}". Return ONLY a JSON array with format: [{ "title": "...", "description": "...", "testCases": "Input: ... Output: ..." }]. No markdown.`;
-      
+
       const response = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: {
           parts: [{ text: prompt }]
         }
@@ -83,7 +83,7 @@ const CreateTest: React.FC = () => {
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-blue-500 mb-6">
           <ArrowLeft size={18} /> Back
         </button>
-        
+
         <h1 className="text-3xl font-bold mb-8">Create Assessment</h1>
 
         <div className="bg-white dark:bg-[#111] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm mb-6">
@@ -124,17 +124,17 @@ const CreateTest: React.FC = () => {
             <h3 className="font-bold mb-4">Add Manually</h3>
             {type === 'aptitude' ? (
               <div className="space-y-3">
-                <input type="text" placeholder="Question" value={manualQ.question} onChange={e => setManualQ({...manualQ, question: e.target.value})} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10" />
+                <input type="text" placeholder="Question" value={manualQ.question} onChange={e => setManualQ({ ...manualQ, question: e.target.value })} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10" />
                 <div className="grid grid-cols-2 gap-3">
                   {manualQ.options.map((opt, i) => (
-                    <input key={i} type="text" placeholder={`Option ${i+1}`} value={opt} onChange={e => {
+                    <input key={i} type="text" placeholder={`Option ${i + 1}`} value={opt} onChange={e => {
                       const newOpts = [...manualQ.options]; newOpts[i] = e.target.value;
-                      setManualQ({...manualQ, options: newOpts});
+                      setManualQ({ ...manualQ, options: newOpts });
                     }} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10" />
                   ))}
                 </div>
-                <select value={manualQ.correct} onChange={e => setManualQ({...manualQ, correct: Number(e.target.value)})} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10">
-                  {manualQ.options.map((_, i) => <option key={i} value={i}>Correct Option: {i+1}</option>)}
+                <select value={manualQ.correct} onChange={e => setManualQ({ ...manualQ, correct: Number(e.target.value) })} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10">
+                  {manualQ.options.map((_, i) => <option key={i} value={i}>Correct Option: {i + 1}</option>)}
                 </select>
                 <button onClick={addManualQuestion} className="w-full py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl font-bold flex items-center justify-center gap-2">
                   <Plus size={18} /> Add Question
@@ -142,9 +142,9 @@ const CreateTest: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                <input type="text" placeholder="Problem Title" value={manualCodeQ.title} onChange={e => setManualCodeQ({...manualCodeQ, title: e.target.value})} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10" />
-                <textarea placeholder="Problem Description" value={manualCodeQ.description} onChange={e => setManualCodeQ({...manualCodeQ, description: e.target.value})} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 h-32" />
-                <textarea placeholder="Test Cases (e.g. Input: 1 2, Output: 3)" value={manualCodeQ.testCases} onChange={e => setManualCodeQ({...manualCodeQ, testCases: e.target.value})} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 h-24" />
+                <input type="text" placeholder="Problem Title" value={manualCodeQ.title} onChange={e => setManualCodeQ({ ...manualCodeQ, title: e.target.value })} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10" />
+                <textarea placeholder="Problem Description" value={manualCodeQ.description} onChange={e => setManualCodeQ({ ...manualCodeQ, description: e.target.value })} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 h-32" />
+                <textarea placeholder="Test Cases (e.g. Input: 1 2, Output: 3)" value={manualCodeQ.testCases} onChange={e => setManualCodeQ({ ...manualCodeQ, testCases: e.target.value })} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 h-24" />
                 <button onClick={addManualQuestion} className="w-full py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl font-bold flex items-center justify-center gap-2">
                   <Plus size={18} /> Add Problem
                 </button>
@@ -163,7 +163,7 @@ const CreateTest: React.FC = () => {
                   </button>
                   {type === 'aptitude' ? (
                     <>
-                      <p className="font-bold mb-2">{i+1}. {q.question}</p>
+                      <p className="font-bold mb-2">{i + 1}. {q.question}</p>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         {q.options.map((opt: string, idx: number) => (
                           <div key={idx} className={`p-2 rounded ${idx === q.correctIndex ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 dark:bg-white/5'}`}>
@@ -174,7 +174,7 @@ const CreateTest: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <p className="font-bold mb-1">{i+1}. {q.title}</p>
+                      <p className="font-bold mb-1">{i + 1}. {q.title}</p>
                       <p className="text-sm text-gray-500 line-clamp-2">{q.description}</p>
                     </>
                   )}

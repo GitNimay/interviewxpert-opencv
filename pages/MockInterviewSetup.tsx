@@ -137,12 +137,12 @@ const MockInterviewSetup: React.FC = () => {
 
     try {
       const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-      const prompt = assessmentType === 'aptitude' 
+      const prompt = assessmentType === 'aptitude'
         ? `Generate 5 aptitude multiple choice questions about "${assessmentTopic}". Return ONLY a JSON array with format: [{ "question": "...", "options": ["A", "B", "C", "D"], "correctIndex": 0 }] (0-3 index). No markdown.`
         : `Generate 1 coding problem about "${assessmentTopic}". Return ONLY a JSON array with format: [{ "title": "...", "description": "...", "testCases": "Input: ... Output: ..." }]. No markdown.`;
-      
+
       const response = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: {
           parts: [{ text: prompt }]
         }
@@ -175,18 +175,18 @@ const MockInterviewSetup: React.FC = () => {
 
         {/* Tabs */}
         <div className="flex gap-6 mb-8 border-b border-gray-200 dark:border-white/10">
-            <button 
-                onClick={() => setActiveTab('video')}
-                className={`pb-4 px-2 text-sm font-bold transition-all relative ${activeTab === 'video' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
-            >
-                <i className="fas fa-video mr-2"></i> Video Interview
-            </button>
-            <button 
-                onClick={() => setActiveTab('assessment')}
-                className={`pb-4 px-2 text-sm font-bold transition-all relative ${activeTab === 'assessment' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
-            >
-                <i className="fas fa-laptop-code mr-2"></i> Skill Assessment
-            </button>
+          <button
+            onClick={() => setActiveTab('video')}
+            className={`pb-4 px-2 text-sm font-bold transition-all relative ${activeTab === 'video' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+          >
+            <i className="fas fa-video mr-2"></i> Video Interview
+          </button>
+          <button
+            onClick={() => setActiveTab('assessment')}
+            className={`pb-4 px-2 text-sm font-bold transition-all relative ${activeTab === 'assessment' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+          >
+            <i className="fas fa-laptop-code mr-2"></i> Skill Assessment
+          </button>
         </div>
 
         {activeTab === 'video' ? (
@@ -308,56 +308,56 @@ const MockInterviewSetup: React.FC = () => {
         ) : (
           <div className="max-w-2xl mx-auto">
             <div className="bg-white dark:bg-[#111] p-6 md:p-8 rounded-2xl border border-gray-200 dark:border-white/5 shadow-xl">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Practice Assessment</h2>
-                <form onSubmit={handleStartAssessment} className="space-y-6">
-                    {/* Type Selection */}
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Assessment Type</label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                type="button"
-                                onClick={() => setAssessmentType('aptitude')}
-                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'aptitude' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
-                            >
-                                <i className="fas fa-brain text-2xl"></i>
-                                <span className="font-bold">Aptitude</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setAssessmentType('coding')}
-                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'coding' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
-                            >
-                                <i className="fas fa-code text-2xl"></i>
-                                <span className="font-bold">Coding</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Topic Input */}
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Topic / Skill</label>
-                        <input 
-                            type="text" 
-                            required
-                            placeholder={assessmentType === 'aptitude' ? "e.g. Logical Reasoning, Mathematics" : "e.g. JavaScript Arrays, Python Algorithms"}
-                            className="w-full p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#050505] dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                            value={assessmentTopic}
-                            onChange={(e) => setAssessmentTopic(e.target.value)}
-                        />
-                    </div>
-
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Practice Assessment</h2>
+              <form onSubmit={handleStartAssessment} className="space-y-6">
+                {/* Type Selection */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Assessment Type</label>
+                  <div className="grid grid-cols-2 gap-4">
                     <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-4 bg-gradient-to-r from-primary to-blue-600 hover:to-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:transform-none flex items-center justify-center gap-2"
+                      type="button"
+                      onClick={() => setAssessmentType('aptitude')}
+                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'aptitude' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
                     >
-                        {loading ? (
-                            <><i className="fas fa-circle-notch fa-spin"></i> Generating...</>
-                        ) : (
-                            <><i className="fas fa-play"></i> Start Practice Test</>
-                        )}
+                      <i className="fas fa-brain text-2xl"></i>
+                      <span className="font-bold">Aptitude</span>
                     </button>
-                </form>
+                    <button
+                      type="button"
+                      onClick={() => setAssessmentType('coding')}
+                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'coding' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
+                    >
+                      <i className="fas fa-code text-2xl"></i>
+                      <span className="font-bold">Coding</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Topic Input */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Topic / Skill</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={assessmentType === 'aptitude' ? "e.g. Logical Reasoning, Mathematics" : "e.g. JavaScript Arrays, Python Algorithms"}
+                    className="w-full p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#050505] dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    value={assessmentTopic}
+                    onChange={(e) => setAssessmentTopic(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 bg-gradient-to-r from-primary to-blue-600 hover:to-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:transform-none flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <><i className="fas fa-circle-notch fa-spin"></i> Generating...</>
+                  ) : (
+                    <><i className="fas fa-play"></i> Start Practice Test</>
+                  )}
+                </button>
+              </form>
             </div>
           </div>
         )}
