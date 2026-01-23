@@ -18,6 +18,8 @@ const MockInterviewSetup: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'video' | 'assessment'>('video');
   const [assessmentType, setAssessmentType] = useState<'aptitude' | 'coding'>('aptitude');
   const [assessmentTopic, setAssessmentTopic] = useState('');
+  const [numQuestions, setNumQuestions] = useState(5);
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
 
   const fetchLinkedinJob = async () => {
     if (!linkedinUrl) return;
@@ -136,25 +138,65 @@ const MockInterviewSetup: React.FC = () => {
     setLoading(true);
 
     try {
+      // Check Wallet Balance
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      const currentBalance = userSnap.data()?.walletBalance || 0;
+      const costPerQuestion = assessmentType === 'coding' ? 10 : 2;
+      const ASSESSMENT_COST = numQuestions * costPerQuestion;
+
+      if (currentBalance < ASSESSMENT_COST) {
+        messageBox.showConfirm(
+          `Insufficient wallet balance (${currentBalance} pts). An assessment requires ${ASSESSMENT_COST} points. Would you like to add points?`,
+          () => navigate('/candidate/payment')
+        );
+        setLoading(false);
+        return;
+      }
+
       const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       const prompt = assessmentType === 'aptitude'
-        ? `Generate 5 aptitude multiple choice questions about "${assessmentTopic}". Return ONLY a JSON array with format: [{ "question": "...", "options": ["A", "B", "C", "D"], "correctIndex": 0 }] (0-3 index). No markdown.`
-        : `Generate 1 coding problem about "${assessmentTopic}". Return ONLY a JSON array with format: [{ "title": "...", "description": "...", "testCases": "Input: ... Output: ..." }]. No markdown.`;
+        ? `Generate ${numQuestions} ${difficulty}-level aptitude multiple choice questions about "${assessmentTopic}". Return ONLY a raw JSON array. Schema: [{"question": "string", "options": ["string", "string", "string", "string"], "correctIndex": number}]`
+        : `Generate ${numQuestions} ${difficulty}-level coding problems about "${assessmentTopic}". Return ONLY a raw JSON array. Schema: [{"title": "string", "description": "string", "testCases": "string"}]`;
 
       const response = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: {
+        contents: [{
           parts: [{ text: prompt }]
+        }],
+        config: {
+          responseMimeType: "application/json"
         }
       });
-      const text = (response.candidates?.[0]?.content?.parts?.[0]?.text || "").replace(/```json|```/g, '').trim();
-      const questions = JSON.parse(text);
+      
+      let text = "";
+      // Handle different SDK response structures
+      if ((response as any).response && typeof (response as any).response.text === 'function') {
+         text = (response as any).response.text();
+      } else if (response.candidates && response.candidates.length > 0) {
+         text = response.candidates[0].content?.parts?.[0]?.text || "";
+      }
+
+      if (!text) throw new Error("No response from AI");
+
+      const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const questions = JSON.parse(cleanText);
+
+      if (!Array.isArray(questions)) throw new Error("AI response is not an array");
+
+      // Deduct Points only after successful generation
+      await updateDoc(userRef, {
+        walletBalance: increment(-ASSESSMENT_COST)
+      });
+
+      const duration = assessmentType === 'aptitude' ? numQuestions * 2 : numQuestions * 15;
 
       const docRef = await addDoc(collection(db, 'tests'), {
-        title: `${assessmentType === 'aptitude' ? 'Aptitude' : 'Coding'} Practice: ${assessmentTopic}`,
+        title: `${assessmentType === 'aptitude' ? 'Aptitude' : 'Coding'} Practice (${difficulty}): ${assessmentTopic}`,
         type: assessmentType,
+        difficulty,
         questions,
-        duration: 15, // 15 minutes for practice
+        duration, 
         recruiterUID: user.uid, // User owns this mock test
         isMock: true,
         createdAt: serverTimestamp()
@@ -306,58 +348,136 @@ const MockInterviewSetup: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white dark:bg-[#111] p-6 md:p-8 rounded-2xl border border-gray-200 dark:border-white/5 shadow-xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Practice Assessment</h2>
-              <form onSubmit={handleStartAssessment} className="space-y-6">
-                {/* Type Selection */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Assessment Type</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setAssessmentType('aptitude')}
-                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'aptitude' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
-                    >
-                      <i className="fas fa-brain text-2xl"></i>
-                      <span className="font-bold">Aptitude</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAssessmentType('coding')}
-                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'coding' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
-                    >
-                      <i className="fas fa-code text-2xl"></i>
-                      <span className="font-bold">Coding</span>
-                    </button>
+          <div className="grid lg:grid-cols-5 gap-12 items-center py-8">
+            {/* Left side: Info */}
+            <div className="lg:col-span-2 text-center lg:text-left">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Sharpen Your Skills</h1>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
+                Take on AI-generated challenges in aptitude or coding to test your knowledge and prepare for technical rounds.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-white/50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10">
+                  <i className="fas fa-brain text-primary text-xl"></i>
+                  <div>
+                    <h4 className="font-semibold">Aptitude Tests</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Logical, quantitative, and verbal reasoning.</p>
                   </div>
                 </div>
-
-                {/* Topic Input */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Topic / Skill</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={assessmentType === 'aptitude' ? "e.g. Logical Reasoning, Mathematics" : "e.g. JavaScript Arrays, Python Algorithms"}
-                    className="w-full p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#050505] dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    value={assessmentTopic}
-                    onChange={(e) => setAssessmentTopic(e.target.value)}
-                  />
+                <div className="flex items-center gap-3 p-3 bg-white/50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10">
+                  <i className="fas fa-code text-primary text-xl"></i>
+                  <div>
+                    <h4 className="font-semibold">Coding Challenges</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Algorithm and data structure problems.</p>
+                  </div>
                 </div>
+              </div>
+            </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-primary to-blue-600 hover:to-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:transform-none flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <><i className="fas fa-circle-notch fa-spin"></i> Generating...</>
-                  ) : (
-                    <><i className="fas fa-play"></i> Start Practice Test</>
-                  )}
-                </button>
-              </form>
+            {/* Right side: Form */}
+            <div className="lg:col-span-3">
+              <div className="bg-white dark:bg-[#111] p-6 md:p-8 rounded-2xl border border-gray-200 dark:border-white/5 shadow-xl">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center justify-between">
+                  Practice Assessment
+                  <span className="text-sm font-normal px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full border border-blue-100 dark:border-blue-800">
+                    <i className="fas fa-coins mr-1"></i> {numQuestions * (assessmentType === 'coding' ? 10 : 2)} Pts
+                  </span>
+                </h2>
+                <form onSubmit={handleStartAssessment} className="space-y-6">
+                  {/* Type Selection */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Assessment Type</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setAssessmentType('aptitude')}
+                        className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'aptitude' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
+                      >
+                        <i className="fas fa-brain text-2xl"></i>
+                        <span className="font-bold">Aptitude</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAssessmentType('coding')}
+                        className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${assessmentType === 'coding' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
+                      >
+                        <i className="fas fa-code text-2xl"></i>
+                        <span className="font-bold">Coding</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Topic Input */}
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Topic / Skill</label>
+                      <div className="relative">
+                        <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input
+                          type="text"
+                          required
+                          placeholder={assessmentType === 'aptitude' ? "e.g. Logical Reasoning, Mathematics" : "e.g. JavaScript Arrays, Python Algorithms"}
+                          className="w-full pl-10 p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#050505] dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          value={assessmentTopic}
+                          onChange={(e) => setAssessmentTopic(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Difficulty Selection */}
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Difficulty</label>
+                      <div className="relative">
+                        <i className="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <select
+                          value={difficulty}
+                          onChange={(e) => setDifficulty(e.target.value as any)}
+                          className="w-full pl-10 p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#050505] dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="Easy">Easy</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Hard">Hard</option>
+                        </select>
+                        <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question Count Input */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Number of Questions</label>
+                      <span className="text-sm font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">
+                        ~{assessmentType === 'aptitude' ? numQuestions * 2 : numQuestions * 15} mins
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-500 font-bold w-8 text-center">{numQuestions}</span>
+                      <input
+                        type="range"
+                        min="1"
+                        max={assessmentType === 'aptitude' ? "20" : "5"}
+                        step="1"
+                        required
+                        className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                        value={numQuestions}
+                        onChange={(e) => setNumQuestions(parseInt(e.target.value) || 1)}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-primary to-blue-600 hover:to-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:transform-none flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <><i className="fas fa-circle-notch fa-spin"></i> Generating...</>
+                    ) : (
+                      <><i className="fas fa-play"></i> Start Practice Test</>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         )}

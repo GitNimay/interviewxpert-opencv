@@ -27,17 +27,30 @@ const CreateTest: React.FC = () => {
     setLoading(true);
     try {
       const prompt = type === 'aptitude'
-        ? `Generate 5 aptitude multiple choice questions about "${aiPrompt}". Return ONLY a JSON array with format: [{ "question": "...", "options": ["A", "B", "C", "D"], "correctIndex": 0 }] (0-3 index). No markdown.`
-        : `Generate 1 coding problem about "${aiPrompt}". Return ONLY a JSON array with format: [{ "title": "...", "description": "...", "testCases": "Input: ... Output: ..." }]. No markdown.`;
+        ? `Generate 5 aptitude multiple choice questions about "${aiPrompt}". Return ONLY a raw JSON array. Schema: [{"question": "string", "options": ["string", "string", "string", "string"], "correctIndex": number}]`
+        : `Generate 1 coding problem about "${aiPrompt}". Return ONLY a raw JSON array. Schema: [{"title": "string", "description": "string", "testCases": "string"}]`;
 
       const response = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: {
+        contents: [{
           parts: [{ text: prompt }]
+        }],
+        config: {
+          responseMimeType: "application/json"
         }
       });
-      const text = (response.candidates?.[0]?.content?.parts?.[0]?.text || "").replace(/```json|```/g, '').trim();
-      const generated = JSON.parse(text);
+      
+      let text = "";
+      if ((response as any).response && typeof (response as any).response.text === 'function') {
+         text = (response as any).response.text();
+      } else if (response.candidates && response.candidates.length > 0) {
+         text = response.candidates[0].content?.parts?.[0]?.text || "";
+      }
+
+      if (!text) throw new Error("No response from AI");
+      
+      const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const generated = JSON.parse(cleanText);
       setQuestions([...questions, ...generated]);
     } catch (error) {
       console.error("AI Error:", error);
