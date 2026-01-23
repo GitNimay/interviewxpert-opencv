@@ -4,7 +4,7 @@ import { db } from '../services/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Job, InterviewRequest } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Video, Users, FileText, Briefcase, MapPin, DollarSign, Clock, Sparkles, ChevronRight, MessageSquare, X, Send, Filter, CheckCircle } from 'lucide-react';
+import { Search, Video, Users, FileText, Briefcase, MapPin, DollarSign, Clock, Sparkles, ChevronRight, MessageSquare, X, Send, Filter, CheckCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const CandidateDashboard: React.FC<{ onlyBestMatches?: boolean }> = ({ onlyBestMatches }) => {
@@ -27,24 +27,13 @@ const CandidateDashboard: React.FC<{ onlyBestMatches?: boolean }> = ({ onlyBestM
     coverNote: ''
   });
   const [submitting, setSubmitting] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: "Your application status has been updated to: Reviewing", time: "1/8/2026", read: false },
-    { id: 2, text: "Your application status has been updated to: Reviewing", time: "1/8/2026", read: false },
-    { id: 3, text: "vjvjkjbk,", time: "1/6/2026", read: true },
-    { id: 4, text: "Congratulations! You have been Hired for the position of web intern.", time: "Just now", read: false }
-  ]);
   const [chatMessages, setChatMessages] = useState([
     { id: 1, sender: 'me', text: "vjvjkjbk,", time: "1/6/2026" },
     { id: 2, sender: 'recruiter', text: "Congratulations! You have been Hired for the position of web intern.", time: "Just now" }
   ]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
 
   const handleSendMessage = () => {
     if (!chatInput.trim()) return;
@@ -425,43 +414,9 @@ const CandidateDashboard: React.FC<{ onlyBestMatches?: boolean }> = ({ onlyBestM
               Welcome back, {userProfile?.fullname?.split(' ')[0] || 'User'}
             </h1>
 
-            <div className="flex items-center gap-3 self-end md:self-auto">
-              {/* Notification Bell */}
-              <div className="relative">
-                <button 
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2.5 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-gray-500 dark:text-gray-400 shadow-sm relative"
-                >
-                  <Bell className="w-5 h-5" />
-                  {notifications.some(n => !n.read) && <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#1A1A1A]"></span>}
-                </button>
-                
-                {/* Dropdown */}
-                {showNotifications && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#1A1A1A] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                    <div className="p-3 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
-                      <h3 className="font-bold text-sm text-gray-900 dark:text-white">Chats & Notifications</h3>
-                      <button onClick={markAllRead} className="text-xs text-blue-500 hover:underline">Mark all read</button>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.map(n => (
-                        <div key={n.id} className={`p-3 border-b border-gray-50 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer ${!n.read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}>
-                          <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">{n.text}</p>
-                          <div className="flex justify-between items-center mt-1">
-                            <p className="text-xs text-gray-400">{n.time}</p>
-                            <button onClick={(e) => { e.stopPropagation(); setShowChat(true); setShowNotifications(false); }} className="text-xs text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1">
-                              <MessageSquare size={12} /> Reply
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Chat Button */}
-              <button 
+          <div className="flex items-center gap-3 self-end md:self-auto">
+            {/* Chat Button */}
+            <button 
                 onClick={() => setShowChat(!showChat)}
                 className={`p-2.5 border border-gray-200 dark:border-white/10 rounded-xl transition-colors shadow-sm ${showChat ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' : 'bg-white dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'}`}
               >

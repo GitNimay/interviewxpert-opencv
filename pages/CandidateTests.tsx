@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const CandidateTests: React.FC = () => {
   const [tests, setTests] = useState<any[]>([]);
-  const [submissions, setSubmissions] = useState<Set<string>>(new Set());
+  const [submissions, setSubmissions] = useState<Map<string, number | null>>(new Map());
   const [loading, setLoading] = useState(true);
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -26,10 +26,21 @@ const CandidateTests: React.FC = () => {
           where('candidateUID', '==', auth.currentUser.uid)
         );
         const subSnap = await getDocs(subQuery);
-        const subSet = new Set(subSnap.docs.map(d => d.data().testId));
+
+        // Map testId -> score (if available)
+        const subMap = new Map<string, number | null>();
+        subSnap.docs.forEach(d => {
+          const data = d.data() as any;
+          const testId = data.testId as string | undefined;
+          if (!testId) return;
+          if (!subMap.has(testId)) {
+            const score = typeof data.score === 'number' ? data.score : null;
+            subMap.set(testId, score);
+          }
+        });
 
         setTests(testsData);
-        setSubmissions(subSet);
+        setSubmissions(subMap);
       } catch (error) {
         console.error("Error fetching tests:", error);
       } finally {
@@ -65,7 +76,8 @@ const CandidateTests: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tests.map(test => {
-              const isTaken = submissions.has(test.id);
+              const submissionScore = submissions.get(test.id);
+              const isTaken = submissionScore !== undefined;
               return (
                 <div key={test.id} className="bg-white dark:bg-[#111] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all flex flex-col">
                   <div className="flex justify-between items-start mb-4">
@@ -75,6 +87,12 @@ const CandidateTests: React.FC = () => {
                     {isTaken && (
                       <span className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-bold rounded-full flex items-center gap-1">
                         <CheckCircle size={12} /> Completed
+                        {submissionScore !== null && (
+                          <span className="ml-1 text-[10px] font-semibold text-green-800 dark:text-green-300">
+                            ({submissionScore}
+                            %)
+                          </span>
+                        )}
                       </span>
                     )}
                   </div>

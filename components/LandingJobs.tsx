@@ -80,7 +80,7 @@ const LandingJobs: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 py-1 pr-1">Active Opportunities</span>
+            Explore <span className="text-blue-600 dark:text-blue-400">Active Opportunities</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Discover roles that match your skills and aspirations. Join top companies hiring now.

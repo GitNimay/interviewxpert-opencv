@@ -123,7 +123,6 @@ const TakeTest: React.FC = () => {
       await document.exitFullscreen().catch(e => console.error(e));
     }
 
-    alert(`Test Submitted! Your Score: ${score}%`);
     navigate('/candidate/jobs');
   };
 
@@ -135,7 +134,6 @@ const TakeTest: React.FC = () => {
   // Auto-submit on timeout
   useEffect(() => {
     if (timeLeft === 0) {
-      alert("Time's up! Your test will be submitted automatically.");
       handleSubmitRef.current?.();
     }
   }, [timeLeft]);

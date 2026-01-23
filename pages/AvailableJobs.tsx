@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { Link } from 'react-router-dom';
-import NotificationCenter from '../components/NotificationCenter';
 import { JOB_CATEGORIES } from './Profile';
 
 interface Job {
@@ -73,9 +72,6 @@ const AvailableJobs: React.FC = () => {
           <Link to="/jobs" className="text-primary font-bold border-b-2 border-primary pb-4 -mb-4 whitespace-nowrap">Available Jobs</Link>
           <Link to="/my-interviews" className="text-gray-500 hover:text-primary font-medium whitespace-nowrap">My Interviews</Link>
           <Link to="/profile" className="text-gray-500 hover:text-primary font-medium whitespace-nowrap">My Profile</Link>
-        </div>
-        <div className="ml-4 flex-shrink-0">
-          <NotificationCenter label="Chats" />
         </div>
       </div>
 
