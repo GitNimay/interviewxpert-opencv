@@ -13,6 +13,7 @@ const CandidateDashboard: React.FC<{ onlyBestMatches?: boolean }> = ({ onlyBestM
   const [requests, setRequests] = useState<Map<string, string>>(new Map()); // jobId -> status
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ shortlisted: 0, hired: 0, rejected: 0, total: 0 });
+  const [assessmentCount, setAssessmentCount] = useState(0);
   const [rawRequests, setRawRequests] = useState<any[]>([]);
   const [rawInterviews, setRawInterviews] = useState<any[]>([]);
   const [funnelData, setFunnelData] = useState<any[]>([]);
@@ -100,10 +101,17 @@ const CandidateDashboard: React.FC<{ onlyBestMatches?: boolean }> = ({ onlyBestM
       setRawInterviews(docs);
     });
 
+    // Real-time: Fetch test submissions (Assessments)
+    const subQuery = query(collection(db, 'testSubmissions'), where('candidateUID', '==', user.uid));
+    const unsubscribeSubmissions = onSnapshot(subQuery, (snapshot) => {
+      setAssessmentCount(snapshot.size);
+    });
+
     return () => {
       unsubscribeRequests();
       unsubscribeJobs();
       unsubscribeStats();
+      unsubscribeSubmissions();
     };
   }, [user]);
 
@@ -467,6 +475,10 @@ const CandidateDashboard: React.FC<{ onlyBestMatches?: boolean }> = ({ onlyBestM
                <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
                   <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Interviews Given</p>
                   <h4 className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">{stats.total}</h4>
+               </div>
+               <div className="p-4 rounded-xl bg-teal-50 dark:bg-teal-900/10 border border-teal-100 dark:border-teal-800/30">
+                  <p className="text-xs text-teal-600 dark:text-teal-400 font-medium mb-1">Assessments</p>
+                  <h4 className="text-2xl font-bold text-teal-700 dark:text-teal-300">{assessmentCount}</h4>
                </div>
                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
                   <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Pending Apps</p>
