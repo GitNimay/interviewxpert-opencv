@@ -494,7 +494,7 @@ const WhoItsFor: React.FC = () => {
       Icon: GraduationCap,
       name: "Students & Grads",
       description: "Land your first internship or full-time role with resume optimization and basic interview prep.",
-      href: "/auth",
+      href: "/#/auth",
       cta: "Get Started",
       background: <div className="absolute -right-20 -top-20 opacity-60 pointer-events-none text-blue-100 dark:text-blue-900/20"><GraduationCap size={200} /></div>,
       className: "md:col-span-1 border-blue-100 dark:border-blue-900/50 hover:border-blue-200 dark:hover:border-blue-800",
@@ -504,7 +504,7 @@ const WhoItsFor: React.FC = () => {
       Icon: Briefcase,
       name: "Professionals",
       description: "Level up your career. Practice advanced behavioral questions and system design scenarios.",
-      href: "/auth",
+      href: "/#/auth",
       cta: "Start Practicing",
       background: <div className="absolute -right-20 -top-20 opacity-60 pointer-events-none text-purple-100 dark:text-purple-900/20"><Briefcase size={200} /></div>,
       className: "md:col-span-1 border-purple-100 dark:border-purple-900/50 hover:border-purple-200 dark:hover:border-purple-800",
@@ -514,7 +514,7 @@ const WhoItsFor: React.FC = () => {
       Icon: Shuffle,
       name: "Career Switchers",
       description: "Transition smoothly into tech or management with role-specific guidance and skill gap analysis.",
-      href: "/auth",
+      href: "/#/auth",
       cta: "Transform Career",
       background: <div className="absolute -right-20 -top-20 opacity-60 pointer-events-none text-orange-100 dark:text-orange-900/20"><Shuffle size={200} /></div>,
       className: "md:col-span-1 border-orange-100 dark:border-orange-900/50 hover:border-orange-200 dark:hover:border-orange-800",
@@ -1147,10 +1147,49 @@ const FinalCTA: React.FC = () => (
 const Footer: React.FC = () => (
   <footer className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white py-8 md:py-12 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 border-b border-slate-200 dark:border-slate-800 pb-12">
+        <div className="col-span-2 md:col-span-1">
+          <div className="flex items-center gap-2 mb-4">
+            <Logo className="w-8 h-8 rounded-lg" />
+            <span className="font-bold text-xl text-slate-900 dark:text-white">InterviewXpert</span>
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+            AI-powered interview preparation platform to help you land your dream job.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-bold text-slate-900 dark:text-white mb-4">Platform</h4>
+          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+            <li><a href="#features" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Features</a></li>
+            <li><a href="#process" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">How it Works</a></li>
+            <li><a href="#pricing" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Pricing</a></li>
+            <li><Link to="/blogs" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Blog</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-slate-900 dark:text-white mb-4">Resources</h4>
+          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+            <li><a href="#jobs" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Jobs</a></li>
+            <li><a href="#testimonials" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Success Stories</a></li>
+            <li><a href="#faq" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-slate-900 dark:text-white mb-4">Get Started</h4>
+          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+            <li><Link to="/auth" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Log In</Link></li>
+            <li><Link to="/auth" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Sign Up</Link></li>
+            <li><Link to="/auth" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">For Recruiters</Link></li>
+          </ul>
+        </div>
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-6">
-        <div className="flex items-center gap-2">
-          <Logo className="w-12 h-12 rounded-xl" />
-          <span className="font-bold text-xl text-slate-900 dark:text-white">InterviewXpert</span>
+        <div className="text-slate-400 dark:text-slate-600 text-xs">
+          &copy; {new Date().getFullYear()} InterviewXpert. All rights reserved.
         </div>
 
         <div className="text-center md:text-right">
@@ -1247,9 +1286,6 @@ const Footer: React.FC = () => (
             <span>,</span>
             <span className="hover:text-slate-900 dark:hover:text-white transition-colors">Sanika Wadnekar</span>
           </div>
-          <div className="text-slate-400 dark:text-slate-600 text-xs mt-4">
-            &copy; {new Date().getFullYear()} InterviewXpert. All rights reserved.
-          </div>
         </div>
       </div>
     </div>
@@ -1265,7 +1301,7 @@ const Home: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 selection:text-blue-900 dark:selection:text-blue-200 transition-colors duration-300">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 selection:text-blue-900 dark:selection:text-blue-200 transition-colors duration-300 overflow-x-hidden">
         <Navbar />
         <main>
           <NeuralBackground />

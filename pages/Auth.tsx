@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, addDoc, collection, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { useNavigate, Link } from 'react-router-dom';
@@ -57,6 +57,7 @@ const AuthPage: React.FC = () => {
   const [role, setRole] = useState<'recruiter' | 'candidate'>('candidate');
   const [experience, setExperience] = useState(0);
   const [phone, setPhone] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +65,9 @@ const AuthPage: React.FC = () => {
     setError(null);
     setMessage(null);
     try {
+      // Set persistence based on rememberMe state
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
       if (!userCredential.user.emailVerified) {
@@ -344,12 +348,16 @@ const AuthPage: React.FC = () => {
                   {isLogin && (
                     <div className="flex items-center justify-between pt-1">
                       <label className="flex items-center gap-2 cursor-pointer group">
-                        <div className="w-3.5 h-3.5 rounded border border-zinc-700 bg-zinc-800 group-hover:border-violet-500 transition-colors flex items-center justify-center">
-                          {/* Fake Checkbox for UI consistency */}
-                          <div className="w-1.5 h-1.5 bg-violet-500 rounded-sm opacity-0 check-indicator"></div>
+                        <div className={`w-3.5 h-3.5 rounded border transition-colors flex items-center justify-center ${rememberMe ? 'border-violet-500 bg-violet-500' : 'border-zinc-700 bg-zinc-800 group-hover:border-violet-500'}`}>
+                          {rememberMe && <i className="fa-solid fa-check text-[8px] text-white"></i>}
                         </div>
                         <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors">Remember me</span>
-                        <input type="checkbox" className="hidden peer" />
+                        <input 
+                          type="checkbox" 
+                          className="hidden" 
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                        />
                       </label>
                       <button
                         type="button"
