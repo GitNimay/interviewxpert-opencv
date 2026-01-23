@@ -348,52 +348,13 @@ const Navbar: React.FC = () => {
   );
 };
 
-const DynamicIslandHero = () => {
-  const [index, setIndex] = useState(0);
-  const messages = [
-    { text: "AI Resume Analysis", icon: FileText, width: 200 },
-    { text: "Mock Interview Ready", icon: Mic, width: 220 },
-    { text: "Hired at Google", icon: CheckCircle, width: 180 }
-  ];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % messages.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="flex justify-center mb-6 md:mb-10 h-12 items-center">
-      <motion.div
-        className="bg-slate-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-slate-900 shadow-2xl relative overflow-hidden"
-        animate={{ width: messages[index].width }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        style={{ height: 44 }}
-      >
-        <AnimatePresence mode='wait'>
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2.5 px-4 absolute"
-          >
-            {React.createElement(messages[index].icon, { size: 16, className: "text-blue-400 dark:text-blue-600" })}
-            <span className="text-sm font-semibold whitespace-nowrap">{messages[index].text}</span>
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-    </div>
-  );
-};
 
 const Hero: React.FC = () => (
   <div className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
       <div className="text-center max-w-4xl mx-auto">
-        <DynamicIslandHero />
+
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-6 md:mb-8 leading-tight">
           Master Your Next <br className="hidden sm:block" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-600 to-primary bg-300% animate-pulse">Interview with AI</span>
@@ -1157,7 +1118,7 @@ const Footer: React.FC = () => (
             AI-powered interview preparation platform to help you land your dream job.
           </p>
         </div>
-        
+
         <div>
           <h4 className="font-bold text-slate-900 dark:text-white mb-4">Platform</h4>
           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
